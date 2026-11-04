@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Пирамида метрик</title>
+<meta name="description" content="Пирамида метрик для бизнеса: главная метрика, её входы, метрики по слоям и ориентиры.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Unbounded:wght@500;600&display=swap">
+<style>
+/* Layout: одна колонка-анкета в три шага; итог — пирамида строк с цветными метками слоёв, как в Атласе */
+:root{
+  --bg:#F3F4F7; --surface:#FFFFFF; --surface-2:#F7F8FA; --ink:#1A1F2B; --muted:#596173; --line:#DCDFE6; --line-strong:#C2C7D1;
+  --accent:#A65804; --accent-ink:#7A4100; --accent-soft:#F6E6D0; --on-accent:#FFFFFF;
+  --fast:#17705F; --fast-soft:#DBEFEA; --slow:#6A4E9F; --slow-soft:#ECE6F6;
+  --warn:#7C5200; --warn-soft:#FBF0D9; --bad:#A2372B; --bad-soft:#F8E3E0;
+  --l-business:#E07B1F; --l-margin:#EA9834; --l-loyalty:#E5B04E; --l-value:#D6B465; --l-quality:#C4AD77; --l-sources:#AF9F80;
+  --on-layer:#1C1408;
+  --f-display:"Unbounded","Golos Text",system-ui,sans-serif;
+  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11141B; --surface:#191D26; --surface-2:#1F2430; --ink:#E6E8EE; --muted:#9BA3B3; --line:#2A303C; --line-strong:#3B4351;
+    --accent:#F0A548; --accent-ink:#F6C27F; --accent-soft:#2D2314; --on-accent:#1A1206;
+    --fast:#5CC9B3; --fast-soft:#14302A; --slow:#B9A2EA; --slow-soft:#272039;
+    --warn:#F2C46B; --warn-soft:#2E2512; --bad:#F09A8E; --bad-soft:#341B18;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11141B; --surface:#191D26; --surface-2:#1F2430; --ink:#E6E8EE; --muted:#9BA3B3; --line:#2A303C; --line-strong:#3B4351;
+  --accent:#F0A548; --accent-ink:#F6C27F; --accent-soft:#2D2314; --on-accent:#1A1206;
+  --fast:#5CC9B3; --fast-soft:#14302A; --slow:#B9A2EA; --slow-soft:#272039;
+  --warn:#F2C46B; --warn-soft:#2E2512; --bad:#F09A8E; --bad-soft:#341B18;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--f-body);-webkit-font-smoothing:antialiased}
+h1,h2,h3{text-wrap:balance;margin:0}
+p{margin:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+.wrap{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:36px 80px;display:grid;gap:24px}
+
+/* ——— Шапка ——— */
+.masthead{display:grid;gap:12px}
+.eyebrow{font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500}
+h1{font-family:var(--f-display);font-weight:600;font-size:clamp(1.8rem,1.3rem + 2.2vw,2.7rem);line-height:1.12;letter-spacing:-.015em}
+.lede{font-size:1.06rem;max-width:62ch}
+.steps{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px 22px;font-size:.9rem;color:var(--muted)}
+.steps li{display:flex;align-items:center;gap:8px}
+.steps .n{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--line-strong);font-size:.78rem;font-weight:600;font-variant-numeric:tabular-nums}
+.steps li[aria-current="step"]{color:var(--ink);font-weight:600}
+.steps li[aria-current="step"] .n{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.steps li.done .n{background:var(--accent-soft);border-color:var(--accent-soft);color:var(--accent-ink)}
+
+.notice{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:12px 16px;font-size:.92rem}
+
+/* ——— Карточки шагов ——— */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:clamp(18px,3vw,28px);display:grid;gap:18px;min-width:0}
+.card-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px}
+.card h2{font-family:var(--f-display);font-weight:500;font-size:1.25rem;line-height:1.25}
+.hint{color:var(--muted);font-size:.92rem;max-width:66ch}
+.small{font-size:.82rem}
+.badge{display:inline-block;font-size:.78rem;font-weight:500;border-radius:999px;padding:2px 10px;background:var(--accent-soft);color:var(--accent-ink)}
+.field{display:grid;gap:6px;min-width:0}
+.lbl{font-weight:600;font-size:.92rem}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0;margin-bottom:6px}
+textarea,select,input[type="text"]{font:inherit;font-size:.97rem;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;padding:10px 12px;width:100%}
+textarea{resize:vertical;min-height:150px;line-height:1.55}
+textarea::placeholder,input::placeholder{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:18px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip span{display:inline-block;font-size:.88rem;padding:6px 14px;border-radius:999px;border:1px solid var(--line-strong);color:var(--muted)}
+.chip input:checked + span{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink);font-weight:500}
+.chip input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px}
+.game{position:relative;display:block}
+.game input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.game .box{display:grid;gap:2px;align-content:start;height:100%;border:1px solid var(--line-strong);border-radius:12px;padding:12px 14px}
+.game b{font-weight:600}
+.game .d{font-size:.85rem;color:var(--muted)}
+.game .guess{font-size:.74rem;font-weight:600;color:var(--accent-ink)}
+.game input:checked + .box{border:2px solid var(--accent);padding:11px 13px;background:var(--accent-soft)}
+.game input:focus-visible + .box{outline:2px solid var(--accent);outline-offset:2px}
+
+.qblock{display:grid;gap:8px}
+.q{font-weight:600;font-size:.97rem}
+.phrase-lead{font-size:.95rem}
+.qlist{display:grid;gap:18px}
+
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:inherit;font-size:.95rem;font-weight:600;border-radius:10px;padding:10px 18px;cursor:pointer;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink)}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted);padding-inline:10px}
+.btn.ghost:hover{color:var(--ink)}
+.btn.sm{font-size:.85rem;padding:6px 12px}
+.err{color:var(--bad);font-size:.88rem}
+
+.status{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;background:var(--surface-2);border-radius:10px;padding:12px 14px;font-size:.92rem}
+.spinner{width:16px;height:16px;border-radius:50%;border:2px solid var(--line-strong);border-top-color:var(--accent);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.st-time{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ——— Пирамида ——— */
+.result{display:grid;gap:18px}
+.summary{font-size:1.04rem;max-width:66ch}
+.bench-note{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:.86rem;line-height:1.5}
+/* Обзор: трапеции слоёв слева, метрики слоя справа — как пирамида в Атласе */
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:.8rem;color:var(--muted)}
+.legend > span{display:inline-flex;align-items:center;gap:7px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.dot.fast{background:var(--fast)}
+.dot.slow{background:var(--slow)}
+.overview{display:grid;gap:4px}
+.ov-row{display:grid;grid-template-columns:clamp(84px,20%,150px) minmax(0,1fr);gap:16px;align-items:stretch}
+.slice{position:relative;min-height:64px}
+.slice::before{content:"";position:absolute;inset:0;background:var(--c);clip-path:polygon(var(--t) 0,calc(100% - var(--t)) 0,calc(100% - var(--b)) 100%,var(--b) 100%)}
+.slice span{position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);font:600 .95rem var(--f-display);color:var(--on-layer)}
+.ov-body{display:grid;gap:7px;align-content:start;padding:10px 0 12px;border-bottom:1px solid var(--line);min-width:0}
+.ov-row:last-child .ov-body{border-bottom:0}
+.ov-h{font-weight:600;font-size:.95rem;line-height:1.35}
+.ov-h i{font-style:normal;font-weight:400;color:var(--muted);font-size:.85rem;margin-left:8px}
+.mchips{display:flex;flex-wrap:wrap;gap:6px}
+.mchip{font:inherit;font-size:.84rem;line-height:1.35;display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
+.mchip:hover{border-color:var(--ink)}
+.mchip.main{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.mchip .tbl{margin-left:0}
+.ov-inputs,.ov-empty{font-size:.8rem;color:var(--muted)}
+.prow.flash,.nsm.flash{animation:flash 1.4s ease-out}
+@keyframes flash{from{box-shadow:0 0 0 3px var(--accent)}to{box-shadow:0 0 0 3px transparent}}
+.pyr{display:grid}
+.prow{display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:6px 14px;align-items:start;padding:12px 0;border-top:1px solid var(--line)}
+.prow.first{border-top:0}
+.lv{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted);padding-top:2px}
+.sw{width:10px;height:10px;border-radius:3px;flex:none}
+.pbody{all:unset;cursor:pointer;display:grid;gap:3px;min-width:0;border-radius:6px}
+.pbody:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.pname{font-weight:600;font-size:.97rem;line-height:1.4}
+.pname .more{display:inline-block;width:7px;height:7px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(45deg);margin-left:10px;vertical-align:.3em;transition:transform .15s}
+.pbody[aria-expanded="true"] .more{transform:rotate(-135deg);vertical-align:0}
+.psub{font-size:.84rem;color:var(--muted);line-height:1.5}
+.tbl{display:inline-block;font-family:var(--f-mono);font-size:.68rem;font-weight:500;letter-spacing:.01em;color:var(--warn);background:var(--warn-soft);border-radius:999px;padding:0 8px;margin-left:6px;vertical-align:.15em;white-space:nowrap}
+.speed{display:inline-block;font-size:.74rem;font-weight:600;line-height:1.5;border-radius:999px;padding:1px 10px;white-space:nowrap}
+.speed.fast{color:var(--fast);background:var(--fast-soft)}
+.speed.slow{color:var(--slow);background:var(--slow-soft)}
+.pdetail{grid-column:2 / -1;display:grid;gap:6px;font-size:.86rem;background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.pdetail dt{font-weight:600;font-size:.78rem;color:var(--muted)}
+.pdetail dd{margin:0 0 4px}
+.pdetail dl{margin:0}
+
+.nsm{background:var(--accent-soft);border-radius:14px;padding:14px 16px;margin:4px 0;display:grid;gap:10px}
+.nsm-top{display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:6px 14px;align-items:start}
+.nsm .lv{color:var(--accent-ink);font-weight:600}
+.nsm-name{font-weight:700;font-size:1.06rem;color:var(--accent-ink);line-height:1.35}
+.nsm-text{font-size:.88rem;color:var(--accent-ink);display:grid;gap:2px}
+.inputs-cap{font-size:.78rem;color:var(--accent-ink)}
+.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:8px}
+.tile{background:var(--surface);border-radius:10px;padding:9px 11px;font-size:.86rem;line-height:1.45;display:grid;gap:2px;align-content:start;min-width:0}
+.tile .k{font-size:.74rem;color:var(--muted)}
+.tile .h{font-size:.78rem;color:var(--muted)}
+
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.ck{font-size:.84rem;border-radius:999px;padding:3px 12px;border:1px solid var(--line-strong)}
+.ck.ok{color:var(--fast);border-color:var(--fast)}
+.ck.no{color:var(--warn);border-color:var(--warn);background:var(--warn-soft)}
+.ck-notes{display:grid;gap:4px;font-size:.86rem;color:var(--warn);padding-left:1.1em;margin:0}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px}
+.box-ok,.box-no{border-radius:12px;padding:14px 16px;display:grid;gap:6px;align-content:start;font-size:.92rem}
+.box-ok{background:var(--fast-soft);color:var(--fast)}
+.box-no{background:var(--bad-soft);color:var(--bad)}
+.box-ok h3,.box-no h3{font-size:.95rem;font-weight:700}
+.box-ok ol,.box-no ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.box-no li span{display:block;font-size:.82rem;opacity:.9}
+h3.sec{font-family:var(--f-display);font-weight:500;font-size:1rem}
+
+
+@media (max-width:560px){
+  .ov-row{grid-template-columns:52px minmax(0,1fr);gap:10px}
+  .slice span{font-size:.72rem}
+  .mchip{border-radius:12px;padding:4px 10px}
+  .prow,.nsm-top{grid-template-columns:minmax(0,1fr) auto}
+  .prow .lv,.nsm-top .lv{grid-column:1 / -1}
+  .prow .lv:empty{display:none}
+  .pdetail{grid-column:1 / -1}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">Пирамида метрик</p>
+    <h1 id="title">Пирамида метрик</h1>
+    <p class="lede" id="lede"></p>
+  </header>
+
+  <section class="card" id="step3" aria-labelledby="s3h">
+    <div class="card-head">
+      <h2 id="s3h">Пирамида метрик</h2>
+      <span class="badge" id="indBadge"></span>
+    </div>
+    <div class="result" id="result"></div>
+    <div class="actions" id="resultActions">
+      <button class="btn primary" id="download" type="button">Скачать PDF</button>
+    </div>
+    <p class="err" id="err3" hidden></p>
+  </section>
+</div>
+
+<!-- render_pyramid.mjs подставляет сюда {business, industry, result} -->
+<script type="application/json" id="adv-data">__DATA__</script>
+<script>
+(function(){
+"use strict";
+
+var DATA = JSON.parse(document.getElementById("adv-data").textContent);
+
+/* Слои пирамиды: вопросы из Атласа; t и b — отступы трапеции сверху и снизу в %, hex — цвет слоя для PDF */
+var LAYERS = [
+  {key:"business", ru:"Бизнес", q:"Зарабатывает ли компания?", t:46, b:38, mark:"₸", hex:"#E07B1F"},
+  {key:"margin", ru:"Экономика", q:"Сходится ли экономика одного клиента?", t:38, b:30, hex:"#EA9834"},
+  {key:"loyalty", ru:"Лояльность", q:"Возвращаются ли люди?", t:30, b:22, hex:"#E5B04E"},
+  {key:"value", ru:"Ценность", q:"Получил ли человек то, за чем пришёл?", t:22, b:14, mark:"NSM", hex:"#D6B465"},
+  {key:"quality", ru:"Качество", q:"Насколько вероятно, что человек получит ценность?", t:14, b:6, hex:"#C4AD77"},
+  {key:"sources", ru:"Источники", q:"Откуда приходят люди и сколько это стоит?", t:6, b:0, hex:"#AF9F80"}
+];
+var GAMES = {
+  attention:{ru:"Внимание", d:"Клиенту важно проводить с вами время: медиа, игры, сообщества"},
+  transaction:{ru:"Транзакции", d:"Клиенту важно быстро и удобно покупать: магазины, доставка, услуги"},
+  productivity:{ru:"Продуктивность", d:"Клиенту важно быстрее решить свою задачу: софт и сервисы для работы"}
+};
+var INPUTS = [["breadth","Охват"],["depth","Глубина"],["frequency","Частота"],["efficiency","Эффективность"]];
+var CHECKS = [["value","выражает ценность"],["leading","опережает деньги"],["actionable","позволяет действовать"],
+  ["sensitive","чувствительная"],["clear","понятная"],["comparable","сравнимая"],["real","реальная"]];
+var STAGES = ["Идея","Первые клиенты","Рост","Масштаб"];
+var SPEED = {fast:"быстрая", slow:"медленная"};
+
+function $(id){ return document.getElementById(id); }
+function h(tag, props){
+  var node = document.createElement(tag);
+  if (props) for (var k in props){
+    var v = props[k];
+    if (v == null || v === false) continue;
+    if (k === "text") node.textContent = v;
+    else if (k === "class") node.className = v;
+    else if (k.slice(0,2) === "on") node.addEventListener(k.slice(2), v);
+    else node.setAttribute(k, v === true ? "" : v);
+  }
+  for (var i = 2; i < arguments.length; i++){
+    var c = arguments[i];
+    if (c == null || c === false) continue;
+    if (Array.isArray(c)) c.forEach(function(x){ if (x != null && x !== false) node.append(x); });
+    else node.append(c);
+  }
+  return node;
+}
+function str(v, max){ var s = typeof v === "string" ? v.trim() : (v == null ? "" : String(v).trim()); return max && s.length > max ? s.slice(0, max - 1) + "…" : s; }
+/* Страховка на случай, если Claude всё же напишет рубли: советник работает в тенге */
+function kzt(s){
+  return s.replace(/₽/g, "₸").replace(/руб\.(?=\s|$)/g, "₸").replace(/рубл(?:ь|я|ей|ю|ём|ем|ях|ям|и)(?![а-яё])/g, "тенге")
+    .replace(/копеек/g, "тиынов").replace(/копейк[иа]/g, "тиына");
+}
+function txt(v, max){ return kzt(str(v, max)); }
+function industryById(){ return DATA.industry || null; }
+function showErr(id, msg){ var e = $(id); e.textContent = msg || ""; e.hidden = !msg; }
+
+function normalize(r, ind){
+  if (!r || typeof r !== "object" || !Array.isArray(r.metrics) || !r.nsm || !str(r.nsm.name)) throw {code:"bad_shape"};
+  var layerKeys = LAYERS.map(function(l){ return l.key; });
+  var used = {};
+  var metrics = r.metrics.map(function(m){
+    if (!m || !str(m.name)) return null;
+    var layer = layerKeys.indexOf(m.layer) >= 0 ? m.layer : (m.layer === "marketing" ? "sources" : "margin");
+    var t = null;
+    if (ind && m.table_id){
+      var n = parseInt(String(m.table_id).replace(/\D/g, ""), 10);
+      if (n >= 1 && n <= ind.metrics.length && !used[n]){ t = n; used[n] = true; }
+    }
+    return {layer:layer, name: t ? ind.metrics[t - 1].name : txt(m.name, 90), speed: m.speed === "fast" ? "fast" : "slow",
+      table: t, note:txt(m.note, 160), how:txt(m.how, 200)};
+  }).filter(Boolean);
+  if (ind) ind.metrics.forEach(function(m, i){
+    if (!used[i + 1]) metrics.push({layer:"margin", name:m.name, speed:"slow", table:i + 1, note:"", how:""});
+  });
+  var inputs = {};
+  INPUTS.forEach(function(p){
+    var x = r.nsm.inputs && r.nsm.inputs[p[0]];
+    if (x && str(x.name)) inputs[p[0]] = {name:txt(x.name, 90), how:txt(x.how, 160)};
+  });
+  var checks = {};
+  CHECKS.forEach(function(c){
+    var x = r.nsm_check && r.nsm_check[c[0]];
+    checks[c[0]] = x ? {ok: x.ok !== false, comment:txt(x.comment, 140)} : null;
+  });
+  return {
+    summary:txt(r.summary, 400),
+    metrics:metrics,
+    nsm:{name:txt(r.nsm.name, 120), how:txt(r.nsm.how, 200), why:txt(r.nsm.why, 240), inputs:inputs},
+    checks:checks,
+    start:(Array.isArray(r.start_with) ? r.start_with : []).map(function(s){ return txt(s, 120); }).filter(Boolean).slice(0, 3),
+    vanity:(Array.isArray(r.vanity) ? r.vanity : []).map(function(v){ return v && {name:txt(v.name, 90), why:txt(v.why, 140)}; })
+      .filter(function(v){ return v && v.name; }).slice(0, 3)
+  };
+}
+
+/* ——— Отрисовка пирамиды ——— */
+
+/* Денежные ориентиры из зарубежных исследований в тенге не переносятся, поэтому сумму не показываем */
+function isDollar(m){ return /\$/.test(m.bench); }
+function benchSub(m){
+  if (isDollar(m)) return "Денежный ориентир из зарубежного исследования не переносим — сравнивайте с собой в динамике";
+  return "Ориентир: " + m.bench.replace(/^Ориентир\s*/, "") + (m.period ? " · " + m.period : "");
+}
+function benchNote(ind){
+  var periods = [], rels = [];
+  ind.metrics.forEach(function(m){
+    if (m.period && periods.indexOf(m.period) < 0) periods.push(m.period);
+    var r = (m.rel || "").toLowerCase();
+    if (r && rels.indexOf(r) < 0) rels.push(r);
+  });
+  var extra = ind.caveat ? " " + ind.caveat : "";
+  return "Ориентиры взяты из таблицы бенчмарков: " + periods.join("; ") + ". Надёжность источников: " + rels.join(", ") +
+    ". Проценты и доли сравнивать можно, денежные суммы из зарубежных исследований — нет." + extra;
+}
+
+function speedTag(s){ return h("span", {class:"speed " + (s === "fast" ? "fast" : "slow"), text:SPEED[s] || SPEED.slow}); }
+
+function metricRow(m, layer, first, ind, id){
+  var tm = m.table && ind ? ind.metrics[m.table - 1] : null;
+  var sub = tm ? benchSub(tm) : m.note;
+  var items = [];
+  function add(k, v){ if (v) items.push(h("dt", {text:k}), h("dd", {text:v})); }
+  if (tm){
+    add("Что значит", tm.what);
+    add("Как считать", tm.how);
+    add("Почему для вас", m.note);
+    if (!isDollar(tm)) add("Как читать ориентир", tm.read);
+    add("Источник", tm.source + (tm.rel ? " · надёжность: " + tm.rel.toLowerCase() : ""));
+  } else {
+    add("Как считать", m.how);
+  }
+  var detail = items.length ? h("div", {class:"pdetail", hidden:true}, h("dl", null, items)) : null;
+  var body = h("button", {class:"pbody", type:"button", "aria-expanded":"false"},
+    h("span", {class:"pname"}, m.name, tm ? h("span", {class:"tbl", text:"Таблица бенчмарков"}) : null,
+      detail ? h("span", {class:"more", "aria-hidden":"true"}) : null),
+    sub ? h("span", {class:"psub", text:sub}) : null);
+  if (detail) body.addEventListener("click", function(){
+    var open = detail.hidden;
+    detail.hidden = !open;
+    body.setAttribute("aria-expanded", String(open));
+  });
+  return h("div", {class:"prow" + (first ? " first" : ""), id:"row-" + id},
+    h("div", {class:"lv"}, layer ? [h("span", {class:"sw", style:"background:var(--l-" + layer.key + ")"}), layer.ru] : null),
+    body, speedTag(m.speed), detail);
+}
+
+function nsmBlock(n){
+  var tiles = INPUTS.filter(function(p){ return n.inputs[p[0]]; }).map(function(p){
+    var x = n.inputs[p[0]];
+    return h("div", {class:"tile"}, h("span", {class:"k", text:p[1]}), h("span", {text:x.name}), x.how ? h("span", {class:"h", text:x.how}) : null);
+  });
+  return h("div", {class:"nsm", id:"row-nsm"},
+    h("div", {class:"nsm-top"},
+      h("div", {class:"lv"}, h("span", {class:"sw", style:"background:var(--l-value)"}), "Ценность · NSM"),
+      h("div", {class:"nsm-name", text:n.name}),
+      speedTag("fast")),
+    h("div", {class:"nsm-text"},
+      n.how ? h("span", {text:"Как считать: " + n.how}) : null,
+      n.why ? h("span", {text:"Почему именно она: " + n.why}) : null),
+    tiles.length ? h("div", {class:"inputs-cap", text:"Входы NSM — на них команда влияет каждую неделю"}) : null,
+    tiles.length ? h("div", {class:"inputs"}, tiles) : null);
+}
+
+/* Раскрывает метрику в подробном списке и подсвечивает её */
+function openRow(id){
+  var row = $("row-" + id);
+  if (!row) return;
+  var body = row.querySelector(".pbody");
+  if (body && body.getAttribute("aria-expanded") === "false") body.click();
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  row.scrollIntoView({behavior:reduce ? "auto" : "smooth", block:"center"});
+  row.classList.remove("flash"); void row.offsetWidth; row.classList.add("flash");
+  if (body) body.focus({preventScroll:true});
+}
+
+function overview(res, ind){
+  function chip(m, idx){
+    return h("button", {class:"mchip", type:"button", onclick:function(){ openRow("m" + idx); }},
+      h("span", {class:"dot " + m.speed, "aria-hidden":"true"}), m.name, m.table ? h("span", {class:"tbl", text:"таблица"}) : null);
+  }
+  var rows = LAYERS.map(function(layer){
+    var chips = [];
+    if (layer.key === "value") chips.push(h("button", {class:"mchip main", type:"button", onclick:function(){ openRow("nsm"); }},
+      h("span", {class:"dot fast", "aria-hidden":"true"}), "Главная метрика: " + res.nsm.name));
+    res.metrics.forEach(function(m, idx){ if (m.layer === layer.key) chips.push(chip(m, idx)); });
+    var inputs = layer.key === "value" ? INPUTS.filter(function(p){ return res.nsm.inputs[p[0]]; })
+      .map(function(p){ return res.nsm.inputs[p[0]].name; }) : [];
+    return h("div", {class:"ov-row"},
+      h("div", {class:"slice", "aria-hidden":"true", style:"--c:var(--l-" + layer.key + ");--t:" + layer.t + "%;--b:" + layer.b + "%"},
+        layer.mark ? h("span", {text:layer.mark}) : null),
+      h("div", {class:"ov-body"},
+        h("div", {class:"ov-h"}, layer.ru, h("i", {text:layer.q})),
+        chips.length ? h("div", {class:"mchips"}, chips) : h("p", {class:"ov-empty", text:"Для этого слоя метрик не подобрано"}),
+        inputs.length ? h("p", {class:"ov-inputs", text:"Входы: " + inputs.join(" · ")}) : null));
+  });
+  return h("div", {class:"qblock"},
+    h("div", {class:"legend"},
+      h("span", null, h("span", {class:"dot slow"}), "медленная — итог, видна через месяцы"),
+      h("span", null, h("span", {class:"dot fast"}), "быстрая — реагирует за дни и недели"),
+      ind ? h("span", null, h("span", {class:"tbl", text:"таблица"}), "есть ориентир из таблицы бенчмарков") : null),
+    h("div", {class:"overview"}, rows));
+}
+
+function renderResult(){
+  var box = $("result"), res = state.result;
+  box.replaceChildren();
+  if (!res) return;
+  var ind = industryById(state.resultIndustry);
+  $("indBadge").textContent = ind ? ind.name : "Отрасль вне таблицы";
+
+  if (res.summary) box.append(h("p", {class:"summary", text:res.summary}));
+  box.append(overview(res, ind));
+  box.append(h("h3", {class:"sec", text:"Подробно по метрикам"}));
+  box.append(h("p", {class:"bench-note", text: ind ? benchNote(ind) : "Для этой отрасли в таблице бенчмарков нет ориентиров. Сравнивайте метрики со своими прошлыми периодами."}));
+
+  var pyr = h("div", {class:"pyr"}), firstRow = true;
+  LAYERS.forEach(function(layer){
+    var rows = res.metrics.map(function(m, idx){ return {m:m, idx:idx}; }).filter(function(x){ return x.m.layer === layer.key; });
+    if (layer.key === "value"){
+      pyr.append(nsmBlock(res.nsm));
+      rows.forEach(function(x, i){ pyr.append(metricRow(x.m, null, i === 0, ind, "m" + x.idx)); });
+      firstRow = false;
+      return;
+    }
+    rows.forEach(function(x, i){ pyr.append(metricRow(x.m, i === 0 ? layer : null, firstRow, ind, "m" + x.idx)); firstRow = false; });
+  });
+  box.append(pyr);
+
+  var checkItems = CHECKS.filter(function(c){ return res.checks[c[0]]; });
+  if (checkItems.length){
+    var weak = checkItems.filter(function(c){ return !res.checks[c[0]].ok; });
+    box.append(h("div", {class:"qblock"},
+      h("h3", {class:"sec", text:"Проверка главной метрики"}),
+      h("div", {class:"checks"}, checkItems.map(function(c){
+        var ok = res.checks[c[0]].ok;
+        return h("span", {class:"ck " + (ok ? "ok" : "no"), title:res.checks[c[0]].comment || null, text:(ok ? "✓ " : "! ") + c[1]});
+      })),
+      weak.length ? h("ul", {class:"ck-notes"}, weak.map(function(c){ return h("li", {text:c[1] + ": " + (res.checks[c[0]].comment || "стоит доработать")}); })) : null));
+  }
+
+  box.append(h("div", {class:"two"},
+    h("div", {class:"box-ok"}, h("h3", {text:"Начните с этих трёх"}),
+      h("ol", null, res.start.map(function(s){ return h("li", {text:s}); }))),
+    h("div", {class:"box-no"}, h("h3", {text:"Не тратьте время"}),
+      h("ul", null, res.vanity.map(function(v){ return h("li", null, v.name, v.why ? h("span", {text:v.why}) : null); })))));
+}
+
+/* ——— PDF для команды ——— */
+
+/* pdfmake грузится только по нажатию «Скачать PDF»: в нём шрифт Roboto с кириллицей */
+var PDFMAKE_URLS = ["https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"];
+var pdfMakeReady = null;
+function loadScript(src){
+  return new Promise(function(resolve, reject){
+    var s = document.createElement("script");
+    s.src = src; s.onload = resolve; s.onerror = function(){ reject(new Error("Не загрузился " + src)); };
+    document.head.append(s);
+  });
+}
+function loadPdfMake(){
+  if (!pdfMakeReady) pdfMakeReady = loadScript(PDFMAKE_URLS[0])
+    .then(function(){ return loadScript(PDFMAKE_URLS[1]); })
+    .then(function(){ if (!window.pdfMake || !window.pdfMake.vfs) throw new Error("pdfmake без шрифтов"); return window.pdfMake; })
+    .catch(function(e){ pdfMakeReady = null; throw e; });
+  return pdfMakeReady;
+}
+
+var PDF_C = {ink:"#1A1F2B", muted:"#596173", line:"#DCDFE6", soft:"#F7F8FA", accent:"#7A4100", accentSoft:"#F6E6D0",
+  warn:"#7C5200", warnSoft:"#FBF0D9", fast:"#17705F", slow:"#6A4E9F", bad:"#A2372B"};
+
+/* Пирамида для первой страницы PDF: трапеции рисуются векторами, высота слоя — по оценке длины текста */
+function pdfPyramid(res){
+  var C = PDF_C, W = 96;
+  var body = LAYERS.map(function(layer){
+    var items = res.metrics.filter(function(m){ return m.layer === layer.key; });
+    var parts = [], chars = 0;
+    function add(t, style){ if (parts.length) parts.push({text:"  ·  ", color:C.muted}); parts.push(Object.assign({text:t}, style)); chars += t.length + 5; }
+    if (layer.key === "value") add("NSM: " + res.nsm.name, {bold:true, color:C.accent});
+    items.forEach(function(m){ add(m.name, {color:m.speed === "fast" ? C.fast : C.slow}); });
+    var inputs = layer.key === "value" ? INPUTS.filter(function(p){ return res.nsm.inputs[p[0]]; })
+      .map(function(p){ return res.nsm.inputs[p[0]].name; }).join(" · ") : "";
+    var stack = [{text:[{text:layer.ru, bold:true}, {text:"   " + layer.q, color:C.muted, fontSize:7.5}], fontSize:9.5}];
+    stack.push(parts.length ? {text:parts, fontSize:8.5, margin:[0, 2, 0, 0]} : {text:"Метрик не подобрано", color:C.muted, fontSize:8, margin:[0, 2, 0, 0]});
+    if (inputs) stack.push({text:"Входы: " + inputs, fontSize:7.5, color:C.muted, margin:[0, 2, 0, 0]});
+    var height = 12 + 6 + Math.max(1, Math.ceil(chars / 80)) * 10.5 + (inputs ? Math.ceil((inputs.length + 7) / 100) * 9.5 : 0) + 8;
+    var t = layer.t / 100 * W, b = layer.b / 100 * W;
+    return [
+      {canvas:[{type:"polyline", closePath:true, lineWidth:0, color:layer.hex, lineColor:layer.hex,
+        points:[{x:t, y:0}, {x:W - t, y:0}, {x:W - b, y:height}, {x:b, y:height}]}]},
+      {stack:stack, fillColor:layer.key === "value" ? C.accentSoft : null, margin:[8, 5, 6, 4]}
+    ];
+  });
+  return {table:{widths:[W, "*"], body:body, dontBreakRows:true},
+    layout:{hLineWidth:function(){ return 0; }, vLineWidth:function(){ return 0; },
+      paddingTop:function(){ return 1.5; }, paddingBottom:function(){ return 1.5; }, paddingLeft:function(){ return 0; }, paddingRight:function(){ return 0; }},
+    margin:[0, 0, 0, 4]};
+}
+
+function pdfDoc(){
+  var res = state.result, ind = industryById(state.resultIndustry), C = PDF_C;
+  function speedCell(s, fill){ return {text:SPEED[s] || SPEED.slow, color:s === "fast" ? C.fast : C.slow, fontSize:8, bold:true, fillColor:fill}; }
+  function box(text, fill, color){
+    return {table:{widths:["*"], body:[[{text:text, fillColor:fill, color:color || C.ink, margin:[8, 6, 8, 6]}]]}, layout:"noBorders", margin:[0, 0, 0, 10]};
+  }
+
+  var body = [[{text:"Слой", style:"th"}, {text:"Метрика", style:"th"}, {text:"Скорость", style:"th"}]];
+  LAYERS.forEach(function(layer){
+    if (layer.key === "value"){
+      var n = res.nsm, f = C.accentSoft;
+      var stack = [{text:n.name, bold:true, color:C.accent, fontSize:11}];
+      if (n.how) stack.push({text:"Как считать: " + n.how, style:"sub"});
+      if (n.why) stack.push({text:"Почему именно она: " + n.why, style:"sub"});
+      var ins = INPUTS.filter(function(p){ return n.inputs[p[0]]; });
+      if (ins.length){
+        stack.push({text:"Входы NSM", bold:true, fontSize:8, color:C.accent, margin:[0, 4, 0, 1]});
+        ins.forEach(function(p){ stack.push({text:[{text:p[1] + ": ", color:C.muted}, n.inputs[p[0]].name], fontSize:8.5}); });
+      }
+      body.push([{text:"Ценность · NSM", bold:true, color:C.accent, fontSize:8.5, fillColor:f}, {stack:stack, fillColor:f}, speedCell("fast", f)]);
+    }
+    res.metrics.filter(function(m){ return m.layer === layer.key; }).forEach(function(m, i){
+      var tm = m.table && ind ? ind.metrics[m.table - 1] : null;
+      var sub = tm ? benchSub(tm) + (tm.rel ? " · надёжность: " + tm.rel.toLowerCase() : "") : m.note;
+      var how = tm ? tm.how : m.how;
+      var stack = [{text:[{text:m.name, bold:true}].concat(tm ? [{text:"   таблица бенчмарков", color:C.warn, fontSize:7}] : [])}];
+      if (sub) stack.push({text:sub, style:"sub"});
+      if (tm && m.note) stack.push({text:"Почему для вас: " + m.note, style:"sub"});
+      if (how) stack.push({text:"Как считать: " + how, style:"sub"});
+      body.push([{text:i === 0 ? layer.ru : "", color:C.muted, fontSize:8.5}, {stack:stack}, speedCell(m.speed)]);
+    });
+  });
+
+  var checks = CHECKS.filter(function(c){ return res.checks[c[0]]; }).map(function(c){
+    var x = res.checks[c[0]];
+    return {text:[{text:c[1] + ": " + (x.ok ? "да" : "нет"), bold:true, color:x.ok ? C.fast : C.warn}, x.comment ? " — " + x.comment : ""]};
+  });
+
+  var content = [
+    {text:"Пирамида метрик", style:"h1"},
+    {text:(ind ? ind.name : "Отрасль вне таблицы") + (state.stage ? " · стадия: " + state.stage : ""), color:C.muted, margin:[0, 0, 0, 10]},
+    res.summary ? {text:res.summary, fontSize:11, margin:[0, 0, 0, 10]} : null,
+    {text:[{text:"Фиолетовым", bold:true, color:C.slow}, " — медленные метрики, итог за месяцы.   ", {text:"Зелёным", bold:true, color:C.fast}, " — быстрые, реагируют за дни и недели."],
+      fontSize:8, color:C.muted, margin:[0, 0, 0, 6]},
+    pdfPyramid(res),
+    {columns:[
+      {width:"*", stack:[{text:"Начните с этих трёх", style:"h2", color:C.fast}, {ol:res.start.slice()}]},
+      {width:"*", stack:[{text:"Не тратьте время", style:"h2", color:C.bad},
+        {ul:res.vanity.map(function(v){ return {text:[{text:v.name, bold:true}, v.why ? "\n" + v.why : ""]}; })}]}
+    ], columnGap:24},
+    {text:"О бизнесе", style:"h2", pageBreak:"before"},
+    box(str(state.desc), C.soft),
+    {text:"Подробно по метрикам", style:"h2"},
+    box(ind ? benchNote(ind) : "Для этой отрасли в таблице бенчмарков нет ориентиров. Сравнивайте метрики со своими прошлыми периодами.", C.warnSoft, C.warn),
+    {table:{headerRows:1, dontBreakRows:true, widths:[78, "*", 56], body:body},
+      layout:{hLineWidth:function(i){ return i === 0 ? 0 : 0.5; }, vLineWidth:function(){ return 0; }, hLineColor:function(){ return C.line; },
+        paddingTop:function(){ return 6; }, paddingBottom:function(){ return 6; }, paddingLeft:function(){ return 5; }, paddingRight:function(){ return 5; }}},
+    checks.length ? {text:"Проверка главной метрики", style:"h2"} : null,
+    checks.length ? {ul:checks} : null
+  ].filter(Boolean);
+
+  return {
+    info:{title:"Пирамида метрик — " + (ind ? ind.name : "мой бизнес")},
+    pageSize:"A4", pageMargins:[40, 40, 40, 50],
+    content:content,
+    footer:function(page, pages){ return {text:"Пирамида метрик · " + page + " из " + pages, alignment:"right", fontSize:8, color:C.muted, margin:[40, 16, 40, 0]}; },
+    styles:{h1:{fontSize:20, bold:true, margin:[0, 0, 0, 2]}, h2:{fontSize:12.5, bold:true, margin:[0, 12, 0, 6]},
+      th:{fontSize:8, bold:true, color:C.muted}, sub:{fontSize:8.5, color:C.muted, margin:[0, 1, 0, 0]}},
+    defaultStyle:{font:"Roboto", fontSize:9.5, lineHeight:1.2, color:C.ink}
+  };
+}
+
+/* В шрифте Roboto из pdfmake нет знака ₸, поэтому в PDF пишем слово «тенге» */
+function pdfSafe(v){
+  if (typeof v === "string") return v.replace(/\s?₸/g, " тенге");
+  if (Array.isArray(v)) return v.map(pdfSafe);
+  if (v && typeof v === "object"){
+    var o = {};
+    for (var k in v) o[k] = typeof v[k] === "function" ? v[k] : pdfSafe(v[k]);
+    return o;
+  }
+  return v;
+}
+
+var pdfBusy = false;
+async function download(){
+  if (pdfBusy || !state.result) return;
+  var btn = $("download"), label = btn.textContent, ind = industryById(state.resultIndustry);
+  showErr("err3"); pdfBusy = true; btn.textContent = "Готовлю PDF…";
+  try{
+    var pdfMake = await loadPdfMake();
+    var blob = await new Promise(function(resolve, reject){
+      try{ pdfMake.createPdf(pdfSafe(pdfDoc())).getBlob(resolve); }catch(e){ reject(e); }
+    });
+    var url = URL.createObjectURL(blob);
+    var a = h("a", {href:url, download:"Пирамида метрик — " + (ind ? ind.name : "мой бизнес") + ".pdf"});
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 10000);
+  }catch(e){
+    showErr("err3", "Не получилось подготовить PDF. Проверьте интернет и нажмите ещё раз.");
+  }finally{ pdfBusy = false; btn.textContent = label; }
+}
+
+/* ——— Запуск ——— */
+
+var B = DATA.business || {};
+var IND = industryById();
+var state = {desc:str(B.desc), stage:str(B.stage), result:normalize(DATA.result, IND), resultIndustry:IND ? IND.id : ""};
+if (B.title){ $("title").textContent = B.title; document.title = "Пирамида метрик — " + B.title; }
+var meta = [IND ? IND.name : "", state.stage ? "стадия: " + state.stage : "", GAMES[B.game] ? "игра: " + GAMES[B.game].ru.toLowerCase() : ""].filter(Boolean);
+$("lede").textContent = meta.join(" · ");
+renderResult();
+$("download").addEventListener("click", download);
+})();
+</script>
+</body>
+</html>

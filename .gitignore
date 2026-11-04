@@ -1,0 +1,9 @@
+.DS_Store
+node_modules/
+*.log
+# Атлас хранится только локально, в публичный репозиторий не попадает
+references/atlas.md
+assets/atlas.html
+# пирамиды, собранные при тестах
+pyramid.json
+pyramid.html
